@@ -74,7 +74,7 @@ export default function FooterSection() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-lg text-white/90 transition hover:text-white md:text-[1.9rem]"
+                      className="text-lg text-white/90 transition hover:text-[#ff5a0f] active:text-[#ff5a0f] focus-visible:text-[#ff5a0f] md:text-[1.9rem]"
                     >
                       {link.label}
                     </a>

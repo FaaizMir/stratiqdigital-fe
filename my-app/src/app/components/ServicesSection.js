@@ -130,26 +130,32 @@ export default function ServicesSection() {
                     onClick={() => setActiveServiceId(service.id)}
                     className={`group flex w-full items-center justify-between rounded-full border px-6 py-4 text-left transition-all duration-300 ${
                       activeServiceId === service.id
-                        ? "border-orange-500"
-                        : "border-zinc-600 hover:border-orange-500"
+                        ? "border-[#ff5a0f] bg-[#ff5a0f]"
+                        : "border-zinc-600 hover:border-[#ff5a0f] hover:bg-[#ff5a0f]"
                     }`}
                   >
                     <div className="flex items-center gap-4">
                       <span
                         className={`text-3xl font-bold transition ${
                           activeServiceId === service.id
-                            ? "text-orange-500"
-                            : "text-zinc-300 group-hover:text-orange-500"
+                            ? "text-white"
+                            : "text-zinc-300 group-hover:text-white"
                         }`}
                       >
                         {service.id}
                       </span>
-                      <p className="text-white text-sm md:text-base font-medium">
+                      <p className="text-white text-sm md:text-base font-medium group-hover:text-white">
                         {service.title}
                       </p>
                     </div>
 
-                    <ArrowRight className="text-zinc-400 group-hover:text-orange-500 transition" />
+                    <ArrowRight
+                      className={`transition ${
+                        activeServiceId === service.id
+                          ? "text-white"
+                          : "text-zinc-400 group-hover:text-white"
+                      }`}
+                    />
                   </button>
 
                   {activeServiceId === service.id && (
