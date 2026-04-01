@@ -11,10 +11,11 @@ export default function Home() {
   return (
     <div className="landing-page">
       <HeroSection />
-      <EfficiencySection />
       <ServicesSection />
       <Services2 />
       <PlatformsSection />
+      <EfficiencySection />
+
       <Testimonials />
       <GetInTouchSection />
       <FooterSection />
