@@ -7,7 +7,7 @@ const testimonials = [
   {
     id: 1,
     name: "Alan",
-    role: "CEO at Alibaba",
+    role: "Procurement Manager at Eastern Imports Co.",
     avatar: "https://i.pravatar.cc/160?img=65",
     message:
       "StratiqDigital helped us cut sourcing time dramatically while keeping quality checks strict and transparent. Their factory communication process is fast and reliable. StratiqDigital helped us cut sourcing time dramatically while keeping quality checks strict and transparent. Their factory communication process is fast and reliable",
@@ -15,7 +15,7 @@ const testimonials = [
   {
     id: 2,
     name: "Mex",
-    role: "COO at TradeNest",
+    role: "Operations Coordinator at TradeNest",
     avatar: "https://i.pravatar.cc/160?img=12",
     message:
       "From supplier verification to logistics, every step was managed professionally. We shipped faster and improved margins within the first quarter. StratiqDigital helped us cut sourcing time dramatically while keeping quality checks strict and transparent. Their factory communication process is fast and reliable",
@@ -23,7 +23,7 @@ const testimonials = [
   {
     id: 3,
     name: "Sophia",
-    role: "Founder at BoltCart",
+    role: "E-commerce Store Owner at BoltCart",
     avatar: "https://i.pravatar.cc/160?img=47",
     message:
       "Their team negotiated better production terms and prevented common manufacturing issues before they reached us. The experience felt premium. StratiqDigital helped us cut sourcing time dramatically while keeping quality checks strict and transparent. Their factory communication process is fast and reliable",
@@ -31,7 +31,7 @@ const testimonials = [
   {
     id: 4,
     name: "Daniel",
-    role: "Head of Ops at UrbanPixel",
+    role: "Supply Chain Specialist at UrbanPixel",
     avatar: "https://i.pravatar.cc/160?img=18",
     message:
       "The sourcing quotation process is clear, quick, and data-backed. We now have trusted factories with stable lead times for scaling.",
@@ -59,7 +59,7 @@ export default function Testimonials() {
   const goNext = () => setActiveIndex((prev) => getLoopedIndex(prev + 1));
 
   return (
-    <section id="testimonials" className="w-full bg-black px-4 pb-16 pt-6 md:px-8 md:pb-24">
+    <section id="testimonials" className="w-full bg-[var(--black)] px-4 py-16 md:px-8 md:py-24">
       <div className="mx-auto max-w-[1700px] overflow-hidden">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-[0.85fr_1.9fr_0.85fr]">
           {visibleCards.map((item, index) => {
@@ -67,7 +67,7 @@ export default function Testimonials() {
             return (
               <article
                 key={item.id}
-                className={`rounded-[2rem] border border-zinc-700 bg-gradient-to-r from-[#1f2024] to-[#2d2d31] p-5 text-white transition-all duration-500 md:min-h-[310px] md:p-6 ${
+                className={`morphism-surface-dark rounded-[2rem] border border-zinc-700 p-5 text-white transition-all duration-500 md:min-h-[310px] md:p-6 ${
                   isCenter
                     ? "md:col-span-1 md:scale-100 md:opacity-100"
                     : "md:scale-95 md:opacity-40"
@@ -82,20 +82,20 @@ export default function Testimonials() {
                       loading="lazy"
                     />
                     <div>
-                      <h3 className="font-[Sora] text-2xl font-extrabold leading-none md:text-[2.8rem]">
+                      <h3 className="heading-font text-2xl leading-none md:text-[2.8rem]">
                         {item.name}
                       </h3>
-                      <p className="text-base font-semibold text-zinc-200 md:text-[1.05rem]">
+                      <p className="description-font text-base text-zinc-200 md:text-[1.05rem]">
                         {item.role}
                       </p>
                     </div>
                   </div>
-                  <span className="font-[Sora] text-6xl font-bold leading-none text-[#ff5a0f] md:text-7xl">
+                  <span className="heading-font text-6xl leading-none text-[var(--orange)] md:text-7xl">
                     “
                   </span>
                 </div>
 
-                <p className="text-[1.05rem] leading-[1.25] text-zinc-100 md:text-[1rem]">
+                <p className="description-font text-[1.05rem] leading-[1.25] text-zinc-100 md:text-[1rem]">
                   {item.message}
                 </p>
               </article>

@@ -89,7 +89,7 @@ export default function HeroSection() {
   };
 
   return (
-    <section id="about-us" className="hero-shell">
+    <section id="hero" className="hero-shell">
       <Image
         src="/assets/hero.png"
         alt="StratiqDigital sourcing hero"
@@ -107,7 +107,7 @@ export default function HeroSection() {
             <a href="#services" className="nav-link">
               Service
             </a>
-            <a href="#about-us" className="logo-wrap" aria-label="StratiqDigital Home">
+            <a href="#hero" className="logo-wrap" aria-label="StratiqDigital Home">
               <Image
                 src="/assets/appLogo.png"
                 alt="StratiqDigital logo"
@@ -115,13 +115,13 @@ export default function HeroSection() {
                 height={46}
               />
             </a>
-            <a href="#projects" className="nav-link">
-              Projects
+            <a href="#testimonials" className="nav-link">
+              Testimonials
             </a>
             <button
               type="button"
               onClick={() => setIsQuoteModalOpen(true)}
-              className="rounded-full border border-[#ff5a0f]/70 bg-[#ff5a0f]/15 px-4 py-2 font-[Sora] text-xs font-semibold text-white transition hover:bg-[#ff5a0f]"
+              className="nav-font rounded-full border border-[var(--orange)]/70 bg-[var(--orange)]/15 px-4 py-2 text-xs font-semibold text-white transition hover:bg-[var(--orange)]"
             >
               Get Free Sourcing Quotation
             </button>
@@ -129,9 +129,9 @@ export default function HeroSection() {
         </div>
 
         <div className="relative md:hidden">
-          <div className="flex items-center justify-between rounded-full border border-white/10 bg-[#010307]/95 px-4 py-3">
+          <div className="morphism-surface-dark flex items-center justify-between rounded-full border border-white/10 px-4 py-3">
             <a
-              href="#about-us"
+              href="#hero"
               aria-label="StratiqDigital Home"
               onClick={closeMobileMenu}
             >
@@ -154,13 +154,13 @@ export default function HeroSection() {
           </div>
 
           {isMobileMenuOpen && (
-            <nav className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 rounded-2xl border border-white/10 bg-[#010307]/97 p-4 shadow-xl">
+            <nav className="morphism-surface-dark absolute left-0 right-0 top-[calc(100%+10px)] z-20 rounded-2xl border border-white/10 p-4 shadow-xl">
               <ul className="space-y-3">
                 <li>
                   <a
-                    href="#about-us"
+                    href="#hero"
                     onClick={closeMobileMenu}
-                    className="block rounded-lg px-3 py-2 font-[Sora] text-sm text-white"
+                    className="nav-font block rounded-lg px-3 py-2 text-sm text-white"
                   >
                     About us
                   </a>
@@ -169,18 +169,18 @@ export default function HeroSection() {
                   <a
                     href="#services"
                     onClick={closeMobileMenu}
-                    className="block rounded-lg px-3 py-2 font-[Sora] text-sm text-white"
+                    className="nav-font block rounded-lg px-3 py-2 text-sm text-white"
                   >
                     Service
                   </a>
                 </li>
                 <li>
                   <a
-                    href="#projects"
+                    href="#testimonials"
                     onClick={closeMobileMenu}
-                    className="block rounded-lg px-3 py-2 font-[Sora] text-sm text-white"
+                    className="nav-font block rounded-lg px-3 py-2 text-sm text-white"
                   >
-                    Projects
+                    Testimonials
                   </a>
                 </li>
                 <li>
@@ -190,7 +190,7 @@ export default function HeroSection() {
                       closeMobileMenu();
                       setIsQuoteModalOpen(true);
                     }}
-                    className="block w-full rounded-lg bg-[#ff5a0f] px-3 py-2 text-left font-[Sora] text-sm font-semibold text-white"
+                    className="nav-font block w-full rounded-lg bg-[var(--orange)] px-3 py-2 text-left text-sm font-semibold text-white"
                   >
                     Get Free Sourcing Quotation
                   </button>
@@ -201,30 +201,33 @@ export default function HeroSection() {
         </div>
 
         <div className="hero-content">
-          <h1>Look Beyond Suppliers. Discover the Verified Factories in China</h1>
+          <h1>
+            Look Beyond Suppliers.<br />
+            Discover the Verified Factories in China
+          </h1>
 
-          <div className="hero-meta-row">
+          <div className="hero-meta-stage">
             <p className="hero-left-copy">
               Guaranteed Transparent Factory Pricing to Help Reduce Costs and
               Increase Profit Margins
             </p>
 
+            <button
+              className="cta-btn hero-cta-btn"
+              type="button"
+              onClick={() => setIsQuoteModalOpen(true)}
+            >
+              Get Free Sourcing Quotation
+              <span aria-hidden="true">↗</span>
+            </button>
+
             <div className="hero-rating">
               <span className="stars">★★★★★</span>
               <p>
-                <strong>300+</strong> Happy Clients
+                <strong>300+</strong> Customers
               </p>
             </div>
           </div>
-
-          <button
-            className="cta-btn"
-            type="button"
-            onClick={() => setIsQuoteModalOpen(true)}
-          >
-            Get Free Sourcing Quotation
-            <span aria-hidden="true">↗</span>
-          </button>
         </div>
 
         <div
@@ -236,7 +239,7 @@ export default function HeroSection() {
           onClick={() => setIsQuoteModalOpen(false)}
         >
           <div
-            className={`w-full max-w-2xl rounded-3xl border border-zinc-600 bg-[#0f1114] p-6 text-white shadow-2xl transition-all duration-300 md:p-8 ${
+            className={`w-full max-w-3xl rounded-3xl border border-zinc-600 bg-[#0f1114] p-8 text-white shadow-2xl transition-all duration-300 md:p-12 ${
               isQuoteModalOpen ? "translate-y-0 scale-100" : "translate-y-6 scale-95"
             }`}
             onClick={(event) => event.stopPropagation()}
@@ -244,9 +247,9 @@ export default function HeroSection() {
             aria-modal="true"
             aria-label="Get free sourcing quotation"
           >
-            <div className="mb-6 flex items-start justify-between gap-3">
+            <div className="mb-8 flex items-start justify-between gap-3">
               <div>
-                <h3 className="font-[Sora] text-3xl font-bold text-[#ff5a0f] md:text-4xl">
+                <h3 className="heading-font text-3xl text-[var(--orange)] md:text-5xl">
                   Request A Quote
                 </h3>
                 <p className="mt-2 text-zinc-300">
@@ -262,7 +265,7 @@ export default function HeroSection() {
               </button>
             </div>
 
-            <form className="grid grid-cols-1 gap-4 md:grid-cols-2" onSubmit={onSubmit}>
+            <form className="grid grid-cols-1 gap-5 md:grid-cols-2" onSubmit={onSubmit}>
               {submitStatus === "success" && (
                 <div className="md:col-span-2 rounded-xl border border-green-600/50 bg-green-900/25 p-3 text-sm text-green-200">
                   {submitMessage}
@@ -284,7 +287,7 @@ export default function HeroSection() {
                   value={formData.name}
                   onChange={onInputChange}
                   disabled={isSubmitting}
-                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-5 py-4 text-base outline-none transition focus:border-[var(--orange)] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="Your full name"
                 />
               </label>
@@ -298,7 +301,7 @@ export default function HeroSection() {
                   value={formData.email}
                   onChange={onInputChange}
                   disabled={isSubmitting}
-                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-5 py-4 text-base outline-none transition focus:border-[var(--orange)] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="you@company.com"
                 />
               </label>
@@ -311,7 +314,7 @@ export default function HeroSection() {
                   value={formData.phone}
                   onChange={onInputChange}
                   disabled={isSubmitting}
-                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-5 py-4 text-base outline-none transition focus:border-[var(--orange)] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="+1 234 567 891"
                 />
               </label>
@@ -324,7 +327,7 @@ export default function HeroSection() {
                   value={formData.company}
                   onChange={onInputChange}
                   disabled={isSubmitting}
-                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-5 py-4 text-base outline-none transition focus:border-[var(--orange)] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="Company name"
                 />
               </label>
@@ -338,7 +341,7 @@ export default function HeroSection() {
                   value={formData.message}
                   onChange={onInputChange}
                   disabled={isSubmitting}
-                  className="w-full resize-none rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full resize-none rounded-xl border border-zinc-600 bg-zinc-900/70 px-5 py-4 text-base outline-none transition focus:border-[var(--orange)] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="Tell us what products you need sourced."
                 />
               </label>
@@ -347,7 +350,7 @@ export default function HeroSection() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full rounded-xl bg-[#ff5a0f] px-5 py-3 font-semibold text-white transition hover:bg-[#ff6f2c] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-xl bg-[var(--orange)] px-5 py-4 text-base font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSubmitting ? "Submitting..." : "Submit Request"}
                 </button>

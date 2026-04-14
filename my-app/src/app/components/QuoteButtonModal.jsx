@@ -84,7 +84,7 @@ export default function QuoteButtonModal() {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="w-full max-w-[600px] rounded-full border border-[#cfd5df] bg-gradient-to-b from-[#737983] via-[#343940] to-[#1a1d21] px-8 py-3 text-left font-[Sora] text-[1.15rem] font-extrabold leading-none text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition duration-300 hover:scale-[1.015] md:py-3 md:text-[1.95rem]"
+          className="heading-font w-full max-w-[600px] rounded-full border border-[#cfd5df] bg-gradient-to-b from-[#737983] via-[#343940] to-[#1a1d21] px-8 py-3 text-left text-[1.15rem] leading-none text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition duration-300 hover:scale-[1.015] md:py-3 md:text-[1.95rem]"
         >
           <span className="flex items-center justify-between gap-4">
             <span className="leading-[1.02]">
@@ -116,7 +116,7 @@ export default function QuoteButtonModal() {
         >
           <div className="mb-6 flex items-start justify-between gap-3">
             <div>
-              <h3 className="font-[Sora] text-3xl font-bold text-[#ff5a0f] md:text-4xl">
+              <h3 className="heading-font text-3xl text-[var(--orange)] md:text-4xl">
                 Request A Quote
               </h3>
               <p className="mt-2 text-zinc-300">
@@ -156,7 +156,7 @@ export default function QuoteButtonModal() {
                 value={formData.name}
                 onChange={onInputChange}
                 disabled={isLoading}
-                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="description-font w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[var(--orange)] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Your full name"
               />
             </label>
@@ -170,7 +170,7 @@ export default function QuoteButtonModal() {
                 value={formData.email}
                 onChange={onInputChange}
                 disabled={isLoading}
-                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="description-font w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[var(--orange)] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="you@company.com"
               />
             </label>
@@ -183,7 +183,7 @@ export default function QuoteButtonModal() {
                 value={formData.phone}
                 onChange={onInputChange}
                 disabled={isLoading}
-                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="description-font w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[var(--orange)] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="+1 234 567 891"
               />
             </label>
@@ -196,7 +196,7 @@ export default function QuoteButtonModal() {
                 value={formData.company}
                 onChange={onInputChange}
                 disabled={isLoading}
-                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="description-font w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[var(--orange)] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Company name"
               />
             </label>
@@ -210,7 +210,7 @@ export default function QuoteButtonModal() {
                 value={formData.message}
                 onChange={onInputChange}
                 disabled={isLoading}
-                className="w-full resize-none rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="description-font w-full resize-none rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[var(--orange)] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Tell us what products you need sourced."
               />
             </label>
@@ -219,7 +219,7 @@ export default function QuoteButtonModal() {
               <button
                 type="submit"
                 disabled={isLoading || submitStatus === "success"}
-                className="w-full rounded-xl bg-[#ff5a0f] px-5 py-3 font-semibold text-white transition hover:bg-[#ff6f2c] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="heading-font w-full rounded-xl bg-[var(--orange)] px-5 py-3 text-white transition hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Submitting..." : "Submit Request"}
               </button>

@@ -42,11 +42,11 @@ const footerColumns = [
 
 export default function FooterSection() {
   return (
-    <footer className="w-full bg-black pb-8 md:pb-12">
-      <div className="w-full rounded-none bg-[#ff5a0f] px-6 py-8 text-white md:px-12 md:py-12">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center">
+    <footer className="w-full bg-[var(--black)] pb-4 pt-0 md:pb-6">
+      <div className="mx-4 w-[calc(100%-2rem)] rounded-[28px] bg-[var(--orange)] px-6 py-7 text-white md:mx-4 md:rounded-[34px] md:px-10 md:py-10 lg:px-12 lg:py-12">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-center">
           <div>
-            <a href="#about-us" className="inline-flex items-center">
+            <a href="#hero" className="inline-flex items-center">
               <Image
                 src="/assets/appLogo.png"
                 alt="StratiqDigital"
@@ -57,16 +57,17 @@ export default function FooterSection() {
             </a>
           </div>
 
-          <p className="max-w-[560px] text-xl leading-tight text-white/95 md:justify-self-end md:text-3xl">
-            Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam
-            nonummy nibh euismod tincidunt ut.
+          <p className="description-font max-w-[560px] text-lg leading-relaxed text-white/95 md:justify-self-end md:text-2xl lg:text-right">
+            StratiqDigital connects brands with verified factories in China,
+            manages sourcing with transparency, and helps you reduce risk,
+            improve margins, and scale with confidence.
           </p>
         </div>
 
-        <div className="mt-10 grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div className="mt-8 grid grid-cols-2 gap-6 md:mt-10 md:grid-cols-4 md:gap-8">
           {footerColumns.map((column) => (
             <nav key={column.title} aria-label={column.title}>
-              <h3 className="font-[Sora] text-4xl font-semibold md:text-[2.75rem]">
+              <h3 className="heading-font text-3xl md:text-[2.5rem]">
                 {column.title}
               </h3>
               <ul className="mt-4 space-y-2">
@@ -74,7 +75,7 @@ export default function FooterSection() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-lg text-white/90 transition hover:text-[#ff5a0f] active:text-[#ff5a0f] focus-visible:text-[#ff5a0f] md:text-[1.9rem]"
+                      className="description-font text-base text-white/90 transition hover:text-white md:text-xl"
                     >
                       {link.label}
                     </a>
@@ -88,16 +89,16 @@ export default function FooterSection() {
         <div className="mt-8 flex flex-col items-start justify-between gap-4 border-t border-white/70 pt-5 md:flex-row md:items-center">
           <a
             href="mailto:info@stratiqdigital.com"
-            className="text-3xl font-semibold text-white md:text-5xl"
+            className="heading-font text-2xl text-white md:text-4xl"
           >
             info@stratiqdigital.com
           </a>
 
           <a
             href="tel:+18884233159"
-            className="inline-flex items-center gap-3 text-3xl font-semibold text-white md:text-5xl"
+            className="heading-font inline-flex items-center gap-3 text-2xl text-white md:text-4xl"
           >
-            <Phone className="h-7 w-7 md:h-9 md:w-9" />
+            <Phone className="h-6 w-6 md:h-8 md:w-8" />
             1-888-000-0000
           </a>
         </div>

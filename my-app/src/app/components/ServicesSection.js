@@ -112,11 +112,11 @@ export default function ServicesSection() {
     services.find((service) => service.id === activeServiceId) || services[0];
 
   return (
-    <section id="services" className="w-full bg-black py-16 px-4">
-      <div className="max-w-7xl mx-auto rounded-3xl bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-700 p-8 md:p-12">
+    <section id="services" className="w-full bg-[var(--black)] px-4 py-16 md:py-24">
+      <div className="morphism-surface-dark mx-auto max-w-7xl rounded-3xl p-8 md:p-14">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
-            <h2 className="text-4xl md:text-5xl font-bold text-orange-500 leading-tight mb-10">
+            <h2 className="heading-font mb-10 text-4xl leading-tight text-[var(--orange)] md:text-5xl">
               Services <br /> We Offer
             </h2>
 
@@ -128,15 +128,15 @@ export default function ServicesSection() {
                   <button
                     type="button"
                     onClick={() => setActiveServiceId(service.id)}
-                    className={`group flex w-full items-center justify-between rounded-full border px-6 py-4 text-left transition-all duration-300 ${
+                    className={`group flex w-full items-center justify-between rounded-full border px-6 py-5 text-left transition-all duration-300 ${
                       activeServiceId === service.id
-                        ? "border-[#ff5a0f] bg-[#ff5a0f]"
-                        : "border-zinc-600 hover:border-[#ff5a0f] hover:bg-[#ff5a0f]"
+                        ? "border-[var(--orange)] bg-[var(--orange)]"
+                        : "border-zinc-600 hover:border-[var(--orange)] hover:bg-[var(--orange)]"
                     }`}
                   >
                     <div className="flex items-center gap-4">
                       <span
-                        className={`text-3xl font-bold transition ${
+                        className={`text-4xl font-bold transition ${
                           activeServiceId === service.id
                             ? "text-white"
                             : "text-zinc-300 group-hover:text-white"
@@ -144,12 +144,13 @@ export default function ServicesSection() {
                       >
                         {service.id}
                       </span>
-                      <p className="text-white text-sm md:text-base font-medium group-hover:text-white">
+                      <p className="description-font text-sm text-white group-hover:text-white md:text-base">
                         {service.title}
                       </p>
                     </div>
 
                     <ArrowRight
+                      size={30}
                       className={`transition ${
                         activeServiceId === service.id
                           ? "text-white"
@@ -160,28 +161,28 @@ export default function ServicesSection() {
 
                   {activeServiceId === service.id && (
                     <div className="mt-4 space-y-4 lg:hidden">
-                      <h3 className="text-lg text-white font-medium">
+                      <h3 className="heading-font text-lg text-white">
                         {service.headline}
                       </h3>
 
-                      <div className="bg-zinc-700/60 rounded-xl p-5 text-zinc-200 text-sm leading-relaxed">
+                      <div className="morphism-shade rounded-xl p-5 text-sm leading-relaxed text-[#1a1a1a]">
                         {service.description}
                       </div>
 
-                      <div className="bg-black rounded-xl p-5">
-                        <h4 className="text-orange-500 font-semibold mb-3 text-base">
+                      <div className="rounded-xl bg-[var(--black)] p-5">
+                        <h4 className="heading-font mb-3 text-base text-[var(--orange)]">
                           What we do:
                         </h4>
-                        <ul className="space-y-2 text-sm text-white list-disc list-inside">
+                        <ul className="description-font list-inside list-disc space-y-2 text-sm text-white">
                           {service.whatWeDo.map((point) => (
                             <li key={point}>{point}</li>
                           ))}
                         </ul>
                       </div>
 
-                      <div className="bg-orange-500 rounded-xl p-5 text-white">
-                        <h4 className="font-semibold mb-3 text-base">Outcome:</h4>
-                        <ul className="space-y-1 text-sm list-disc list-inside">
+                      <div className="rounded-xl bg-[var(--orange)] p-5 text-white">
+                        <h4 className="heading-font mb-3 text-base">Outcome:</h4>
+                        <ul className="description-font list-inside list-disc space-y-1 text-sm">
                           {service.outcome.map((point) => (
                             <li key={point}>{point}</li>
                           ))}
@@ -195,28 +196,28 @@ export default function ServicesSection() {
           </div>
 
           <div className="hidden space-y-6 lg:block">
-            <h3 className="text-xl md:text-2xl text-white font-medium">
+            <h3 className="heading-font text-xl text-white md:text-2xl">
               {activeService.headline}
             </h3>
 
-            <div className="bg-zinc-700/60 rounded-xl p-6 text-zinc-200 text-sm md:text-base leading-relaxed">
+            <div className="morphism-shade description-font rounded-xl p-6 text-sm leading-relaxed text-[#1a1a1a] md:text-base">
               {activeService.description}
             </div>
 
-            <div className="bg-black rounded-xl p-6">
-              <h4 className="text-orange-500 font-semibold mb-4 text-lg">
+            <div className="rounded-xl bg-[var(--black)] p-6">
+              <h4 className="heading-font mb-4 text-lg text-[var(--orange)]">
                 What we do:
               </h4>
-              <ul className="space-y-2 text-sm md:text-base text-white list-disc list-inside">
+              <ul className="description-font list-inside list-disc space-y-2 text-sm text-white md:text-base">
                 {activeService.whatWeDo.map((point) => (
                   <li key={point}>{point}</li>
                 ))}
               </ul>
             </div>
 
-            <div className="bg-orange-500 rounded-xl p-6 text-white">
-              <h4 className="font-semibold mb-3 text-lg">Outcome:</h4>
-              <ul className="space-y-1 text-sm md:text-base list-disc list-inside">
+            <div className="rounded-xl bg-[var(--orange)] p-6 text-white">
+              <h4 className="heading-font mb-3 text-lg">Outcome:</h4>
+              <ul className="description-font list-inside list-disc space-y-1 text-sm md:text-base">
                 {activeService.outcome.map((point) => (
                   <li key={point}>{point}</li>
                 ))}

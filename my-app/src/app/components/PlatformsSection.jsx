@@ -3,17 +3,17 @@ import QuoteButtonModal from "./QuoteButtonModal";
 
 export default function PlatformsSection() {
   return (
-    <section id="projects" className="w-full bg-black px-4 pb-16 md:px-8 md:pb-24">
+    <section id="projects" className="w-full bg-[var(--black)] px-4 py-16 md:px-8 md:py-24">
       <div className="mx-auto max-w-7xl">
-        <div className="overflow-hidden rounded-[34px] border border-zinc-700/70 bg-[#f3f3f3] p-6 md:p-10 lg:p-14">
+        <div className="morphism-surface overflow-hidden rounded-[34px] border border-zinc-700/70 p-6 md:p-10 lg:p-14">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <h2 className="self-start font-[Sora] text-4xl font-extrabold leading-[0.95] text-[#ff5a0f] md:text-6xl">
+            <h2 className="heading-font self-start text-4xl leading-[0.95] text-[var(--orange)] md:text-6xl">
               Platforms
               <br />
               We Support
             </h2>
 
-            <p className="self-start justify-self-start pt-2 text-2xl font-medium leading-tight text-[#101114] md:text-4xl lg:justify-self-end lg:pt-4 lg:text-right">
+            <p className="description-font self-start justify-self-start pt-2 text-2xl leading-tight text-[var(--black)] md:text-4xl lg:justify-self-end lg:pt-4 lg:text-right">
               Helping you succeed across
               <br />
               all major online marketplaces

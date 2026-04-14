@@ -32,23 +32,23 @@ const categories = [
 
 export default function Services2() {
   return (
-    <section id="difference" className="w-full bg-black px-4 pb-16 md:px-8 md:pb-24">
+    <section id="difference" className="w-full bg-[var(--black)] px-4 py-16 md:px-8 md:py-24">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <h2 className="font-[Sora] text-4xl font-extrabold leading-[0.95] text-[#ff5a0f] md:text-6xl">
+            <h2 className="heading-font text-4xl leading-[0.95] text-[var(--orange)] md:text-6xl">
               The Difference
               <br />
               You&apos;ll Notice
             </h2>
 
-            <div className="mt-8 rounded-3xl border border-zinc-600 bg-gradient-to-br from-zinc-800/95 to-zinc-700/80 p-6 md:p-7">
+            <div className="morphism-surface-dark mt-8 rounded-3xl border border-zinc-600 p-6 md:p-7">
               {differenceItems.map((item) => (
                 <div
                   key={item}
                   className="flex items-center justify-between border-b border-zinc-400/70 py-3 text-white"
                 >
-                  <p className="text-xl font-semibold leading-tight md:text-[2rem]">
+                  <p className="heading-font text-xl leading-tight md:text-[2rem]">
                     {item}
                   </p>
                   <Plus className="h-6 w-6 shrink-0 text-zinc-200" />
@@ -58,7 +58,7 @@ export default function Services2() {
           </div>
 
           <div>
-            <p className="mx-auto max-w-[360px] text-center text-2xl font-medium leading-tight text-white md:text-4xl lg:text-right">
+            <p className="description-font mx-auto max-w-[360px] text-center text-2xl leading-tight text-[var(--white-soft)] md:text-4xl lg:text-right">
               What sets us apart from other sourcing agents.
             </p>
             <div className="mt-6 overflow-hidden rounded-3xl border border-zinc-600/70">
@@ -74,12 +74,12 @@ export default function Services2() {
         </div>
 
         <div className="mt-14 grid grid-cols-1 items-end gap-6 md:grid-cols-[1fr_auto] md:gap-10">
-          <h3 className="font-[Sora] text-4xl font-extrabold leading-[0.95] text-[#ff5a0f] md:text-6xl">
+          <h3 className="heading-font text-4xl leading-[0.95] text-[var(--orange)] md:text-6xl">
             Scale Across
             <br />
             Categories
           </h3>
-          <p className="max-w-[500px] text-left text-2xl font-medium leading-tight text-white md:text-right md:text-4xl">
+          <p className="description-font max-w-[500px] text-left text-2xl leading-tight text-[var(--white-soft)] md:text-right md:text-4xl">
             Work with reliable factories in over 100 product categories.
           </p>
         </div>
@@ -88,7 +88,7 @@ export default function Services2() {
           {categories.map((category) => (
             <article
               key={category.title}
-              className="rounded-3xl border border-zinc-600 bg-gradient-to-br from-zinc-800 to-zinc-700 px-6 py-7 text-center"
+              className="morphism-surface-dark rounded-3xl border border-zinc-600 px-6 py-7 text-center"
             >
               <div className="mx-auto mb-5 flex h-[62px] w-[62px] items-center justify-center">
                 <Image
@@ -99,10 +99,10 @@ export default function Services2() {
                   className="h-auto w-auto"
                 />
               </div>
-              <h4 className="text-2xl font-semibold text-white md:text-[2rem]">
+              <h4 className="heading-font text-2xl text-white md:text-[2rem]">
                 {category.title}
               </h4>
-              <p className="mx-auto mt-2 max-w-[250px] text-base leading-tight text-zinc-200 md:text-lg">
+              <p className="description-font mx-auto mt-2 max-w-[250px] text-base leading-tight text-zinc-200 md:text-lg">
                 {category.subtitle}
               </p>
             </article>
