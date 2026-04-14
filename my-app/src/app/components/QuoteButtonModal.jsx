@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { saveQuoteRequest } from "../firebase";
 
 const initialForm = {
   name: "",
@@ -13,6 +14,9 @@ const initialForm = {
 export default function QuoteButtonModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState(initialForm);
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', or null
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
@@ -39,10 +43,39 @@ export default function QuoteButtonModal() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
-    setIsOpen(false);
-    setFormData(initialForm);
+    setIsLoading(true);
+    setSubmitStatus(null);
+    setErrorMessage("");
+
+    try {
+      await saveQuoteRequest({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        company: formData.company.trim(),
+        message: formData.message.trim(),
+        status: "pending",
+      });
+
+      setSubmitStatus("success");
+      setFormData(initialForm);
+
+      // Auto close after 2 seconds on success
+      setTimeout(() => {
+        setIsOpen(false);
+        setSubmitStatus(null);
+      }, 2000);
+    } catch (error) {
+      setSubmitStatus("error");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Unable to submit right now. Please try again."
+      );
+      console.error("Quote submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -100,6 +133,20 @@ export default function QuoteButtonModal() {
           </div>
 
           <form className="grid grid-cols-1 gap-4 md:grid-cols-2" onSubmit={onSubmit}>
+            {submitStatus === "success" && (
+              <div className="md:col-span-2 rounded-xl bg-green-900/30 border border-green-600/50 p-4 text-green-200">
+                <p className="font-medium">✓ Quote submitted successfully!</p>
+                <p className="text-sm mt-1">We'll be in touch shortly with a customized quote.</p>
+              </div>
+            )}
+
+            {submitStatus === "error" && (
+              <div className="md:col-span-2 rounded-xl bg-red-900/30 border border-red-600/50 p-4 text-red-200">
+                <p className="font-medium">✗ Error submitting quote</p>
+                <p className="text-sm mt-1">{errorMessage}</p>
+              </div>
+            )}
+
             <label className="space-y-2 text-sm">
               <span>Name</span>
               <input
@@ -108,7 +155,8 @@ export default function QuoteButtonModal() {
                 type="text"
                 value={formData.name}
                 onChange={onInputChange}
-                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                disabled={isLoading}
+                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Your full name"
               />
             </label>
@@ -121,7 +169,8 @@ export default function QuoteButtonModal() {
                 type="email"
                 value={formData.email}
                 onChange={onInputChange}
-                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                disabled={isLoading}
+                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="you@company.com"
               />
             </label>
@@ -133,7 +182,8 @@ export default function QuoteButtonModal() {
                 type="tel"
                 value={formData.phone}
                 onChange={onInputChange}
-                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                disabled={isLoading}
+                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="+1 234 567 891"
               />
             </label>
@@ -145,7 +195,8 @@ export default function QuoteButtonModal() {
                 type="text"
                 value={formData.company}
                 onChange={onInputChange}
-                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                disabled={isLoading}
+                className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Company name"
               />
             </label>
@@ -158,7 +209,8 @@ export default function QuoteButtonModal() {
                 rows={4}
                 value={formData.message}
                 onChange={onInputChange}
-                className="w-full resize-none rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                disabled={isLoading}
+                className="w-full resize-none rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Tell us what products you need sourced."
               />
             </label>
@@ -166,9 +218,10 @@ export default function QuoteButtonModal() {
             <div className="md:col-span-2">
               <button
                 type="submit"
-                className="w-full rounded-xl bg-[#ff5a0f] px-5 py-3 font-semibold text-white transition hover:bg-[#ff6f2c]"
+                disabled={isLoading || submitStatus === "success"}
+                className="w-full rounded-xl bg-[#ff5a0f] px-5 py-3 font-semibold text-white transition hover:bg-[#ff6f2c] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Submit Request
+                {isLoading ? "Submitting..." : "Submit Request"}
               </button>
             </div>
           </form>

@@ -1,0 +1,996 @@
+"use client";
+
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter, Link } from "@/i18n/routing";
+import axiosInstance from "@/lib/axios";
+import useDebounce from "@/hooks/useDebounceRef";
+import {
+  Store,
+  MapPin,
+  Menu,
+  QrCode,
+  Smartphone,
+  TrendingUp,
+  Globe,
+  Shield,
+  Gift,
+  Zap,
+  Megaphone,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { LanguageSwitcher } from "@/components/common/language-switcher";
+import Image from "next/image";
+import {
+  TopBannerAd,
+  SidebarAd,
+  BottomBannerAd,
+} from "./components/PaidAdsDisplay";
+import {
+  MarketplaceFilters,
+  MerchantList,
+  MerchantDetail,
+} from "./components/MerchantMarketplace";
+import { CouponForm } from "./components/CouponForm";
+import DynamicLandingPageSections from "@/components/homepage/DynamicLandingPageSections";
+import { cn } from "@/lib/utils";
+import { toast } from "@/lib/toast";
+
+export default function AgentLandingPage({ agentId: agentIdProp } = {}) {
+  const t = useTranslations("Homepage.agent");
+  const tCommon = useTranslations("Homepage.common");
+
+  const router = useRouter();
+
+  // agentId comes from URL prop (dynamic route) or falls back to localStorage
+  const [agentId, setAgentId] = useState(agentIdProp || null);
+
+  useEffect(() => {
+    if (agentIdProp) {
+      // agentId is provided via URL — no localStorage needed
+      setAgentId(agentIdProp);
+      return;
+    }
+
+    // Fallback: read from localStorage (legacy /homepage/agent route)
+    try {
+      const storedAgent = localStorage.getItem("selectedAgent");
+      if (storedAgent) {
+        const parsedAgent = JSON.parse(storedAgent);
+
+        if (parsedAgent && typeof parsedAgent === "object" && parsedAgent.id) {
+          const ONE_HOUR = 60 * 60 * 1000;
+          const now = Date.now();
+          const timestamp = parsedAgent._timestamp || 0;
+
+          if (now - timestamp < ONE_HOUR) {
+            setAgentId(parsedAgent.id);
+            setAgent(parsedAgent);
+          } else {
+            console.warn(t("errors.agentDataExpired"));
+            localStorage.removeItem("selectedAgent");
+          }
+        } else {
+          console.warn(t("errors.invalidAgentData"));
+          localStorage.removeItem("selectedAgent");
+        }
+      }
+    } catch (error) {
+      console.error(t("errors.errorLoadingAgent"), error);
+      localStorage.removeItem("selectedAgent");
+    }
+  }, [agentIdProp, t]);
+
+  // Refs
+  const merchantListRef = useRef(null);
+
+  // State
+  const [agent, setAgent] = useState(null);
+  const [merchants, setMerchants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedMerchantId, setSelectedMerchantId] = useState(null);
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalMerchants, setTotalMerchants] = useState(0);
+
+  // Filters state
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 1000);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedRegion, setSelectedRegion] = useState("all");
+  const [expiringSoon, setExpiringSoon] = useState(false);
+
+  // Derived lists
+  const [categories, setCategories] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  // Paid Ads
+  const [paidAds, setPaidAds] = useState([]);
+  const [footerTitle, setFooterTitle] = useState("");
+
+  // Coupon Dialog State
+  const [couponDialogOpen, setCouponDialogOpen] = useState(false);
+  const [selectedCouponData, setSelectedCouponData] = useState({
+    merchant: null,
+    batch: null,
+  });
+
+  // Fetch Paid Ads
+  const fetchPaidAds = useCallback(async () => {
+    if (!agentId) return;
+    try {
+      const response = await axiosInstance.get(
+        `/approvals/approved-paid-ads/admin/${agentId}`,
+      );
+      const rawData =
+        response.data?.data ||
+        (Array.isArray(response.data) ? response.data : []);
+
+      const transformedAds = rawData
+        .filter((item) => item && item.id)
+        .filter((item) => {
+          // Check both top-level and settings for media
+          const hasImage = item.paid_ad_image || item.settings?.paid_ad_image;
+          const hasVideo = item.paid_ad_video || item.settings?.paid_ad_video;
+          return hasImage || hasVideo;
+        })
+        .map((item) => ({
+          id: item.id,
+          image: item.paid_ad_image || item.settings?.paid_ad_image || null,
+          video: item.paid_ad_video || item.settings?.paid_ad_video || null,
+          isVideo:
+            item.settings?.paid_ad_video_status ||
+            item.paid_ad_video_status ||
+            false,
+          placement:
+            item.paid_ad_placement || item.settings?.paid_ad_placement || "top",
+          title: item.business_name || t("ads.sponsoredDeal"),
+          description: t("ads.visitBusiness", {
+            businessName: item.business_name,
+            city: item.city,
+            country: item.country,
+          }),
+          redirectUrl: `/customer/review?mid=${item.id}`,
+          cta: t("ads.viewOffer"),
+          tagline: item.city
+            ? t("ads.exclusiveIn", { city: item.city.toUpperCase() })
+            : t("ads.limitedTime"),
+          city: item.city,
+          businessType: item.business_type,
+        }));
+      setPaidAds(transformedAds);
+    } catch (err) {
+      console.warn(t("errors.failedToLoadPaidAds"), err);
+    }
+  }, [agentId, t]);
+
+  // Fetch dynamic footer title for the brand block in footer
+  const fetchFooterTitle = useCallback(async () => {
+    if (!agentId) return;
+
+    try {
+      const response = await axiosInstance.get(
+        `/agent-landing-pages/public/${agentId}`,
+      );
+      const dynamicFooterTitle = response?.data?.data?.footer_title;
+      setFooterTitle(dynamicFooterTitle || "");
+    } catch (err) {
+      console.warn("Failed to load dynamic footer title:", err);
+      setFooterTitle("");
+    }
+  }, [agentId]);
+
+  // Fetch Merchants with Pagination
+  const fetchMerchants = useCallback(
+    async (pageNum = 1, reset = false) => {
+      if (reset) {
+        setLoading(true);
+        setPage(1);
+      } else {
+        setLoadingMore(true);
+      }
+
+      try {
+        const params = {
+          adminId: agentId,
+          page: pageNum,
+          pageSize: 6,
+        };
+
+        // Add search parameter (searches merchant business name)
+        if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
+          params.businessName = debouncedSearchQuery.trim();
+        }
+
+        // Add business type parameter
+        if (selectedCategory && selectedCategory !== "all") {
+          params.businessType = selectedCategory;
+        }
+
+        // Add city parameter (searches merchant's city)
+        if (selectedRegion && selectedRegion !== "all") {
+          params.city = selectedRegion;
+        }
+
+        // Add expiringSoon parameter
+        if (expiringSoon) {
+          params.expiringSoon = true;
+        }
+
+        const response = await axiosInstance.get(`/coupons/public-feed`, {
+          params,
+        });
+
+        const rawData =
+          response.data?.data?.merchants ||
+          (Array.isArray(response.data) ? response.data : []);
+
+        const normalizedMerchants = rawData
+          .filter((item) => item && item.id)
+          .slice(0, 6) // Ensure max 6 merchants per page
+          .map((item) => ({
+            id: item.id,
+            name: item.business_name || t("fallback.unknown"),
+            category: item.business_type || t("fallback.general"),
+            city: item.city || t("fallback.unknown"),
+            country: item.country || "",
+            address: item.address || "",
+            logo: null,
+            coverImage: null,
+            batches:
+              item.batches?.map((b) => ({
+                id: b.id,
+                batch_name: b.batch_name,
+                discount_percentage: b.discount_percentage,
+                expiry_date: b.expiry_date,
+                is_active: b.is_active,
+                rendered_html: b.rendered_html,
+                total_quantity: b.total_quantity,
+                issued_quantity: b.issued_quantity,
+              })) || [],
+          }));
+
+        if (reset) {
+          setMerchants(normalizedMerchants);
+          // Extract filter options ONLY from initial unfiltered load
+          // Don't update filter lists when filters are already applied
+          if (
+            selectedCategory === "all" &&
+            selectedRegion === "all" &&
+            !debouncedSearchQuery
+          ) {
+            const cats = [
+              ...new Set(
+                normalizedMerchants.map((m) => m.category).filter(Boolean),
+              ),
+            ].sort();
+            const locs = [
+              ...new Set(
+                normalizedMerchants.map((m) => m.city).filter(Boolean),
+              ),
+            ].sort();
+            setCategories(cats);
+            setCities(locs);
+          }
+        } else {
+          setMerchants(normalizedMerchants);
+        }
+
+        // Update pagination state
+        setHasMore(normalizedMerchants.length === 6);
+        setTotalMerchants(
+          response.data?.pagination?.total ||
+            (pageNum === 1 ? normalizedMerchants.length : totalMerchants),
+        );
+        setPage(pageNum);
+      } catch (err) {
+        console.error(t("errors.failedToFetchMerchants"), err);
+        setError(t("errors.unableToLoadMerchants"));
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [
+      agentId,
+      debouncedSearchQuery,
+      selectedCategory,
+      selectedRegion,
+      expiringSoon,
+      t,
+      totalMerchants,
+    ],
+  );
+
+  // Fetch agent profile from API (used when agentId comes from URL)
+  const fetchAgentProfile = useCallback(async () => {
+    if (!agentId) return;
+    try {
+      const response = await axiosInstance.get(`/coupons/public-feed`, {
+        params: { adminId: agentId, page: 1, pageSize: 1 },
+      });
+      const adminInfo = response.data?.data?.admin;
+      if (adminInfo && adminInfo.id) {
+        setAgent({
+          id: adminInfo.id,
+          name: adminInfo.name || adminInfo.user?.name || null,
+          location:
+            adminInfo.city || adminInfo.country || adminInfo.address || null,
+        });
+      }
+    } catch {
+      // Silently fail — agent display name is optional
+    }
+  }, [agentId]);
+
+  // Fetch Main Data
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!agentId) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        // 1. Fetch agent profile (when using URL-based agentId)
+        if (agentIdProp) {
+          await fetchAgentProfile();
+        }
+
+        // 2. Fetch Merchants with Pagination
+        await fetchMerchants(1, true); // Initial load
+
+        // 3. Fetch Ads
+        await fetchPaidAds();
+
+        // 4. Fetch dynamic footer title
+        await fetchFooterTitle();
+      } catch (err) {
+        console.error(t("errors.failedToLoadData"), err);
+        setError(t("errors.unableToLoadPage"));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [
+    agentId,
+    agentIdProp,
+    debouncedSearchQuery,
+    selectedCategory,
+    selectedRegion,
+    expiringSoon,
+    fetchAgentProfile,
+    fetchPaidAds,
+    fetchFooterTitle,
+    fetchMerchants,
+    t,
+  ]);
+
+  const activeMerchant = useMemo(
+    () => merchants.find((m) => m.id === selectedMerchantId) || null,
+    [merchants, selectedMerchantId],
+  );
+
+  // Derived Ads
+  const topAd = paidAds.find((a) => a.placement === "top") || null;
+  const leftAd = paidAds.find((a) => a.placement === "left") || null;
+  const rightAd =
+    paidAds.find((a) => a.placement === "sidebar" || a.placement === "right") ||
+    null;
+  const bottomAd = paidAds.find((a) => a.placement === "bottom") || null;
+  const inlineAds = paidAds.filter((a) => a.placement === "inline");
+
+  // Handlers
+  const handleGetCoupon = (merchant, batch) => {
+    setSelectedCouponData({ merchant, batch });
+    setCouponDialogOpen(true);
+  };
+
+  // Track impression
+  const handleAdImpression = useCallback(
+    async (ad) => {
+      if (!agentId || !ad || !ad.id) return;
+
+      try {
+        await axiosInstance.post("/analytics/track-impression", {
+          merchantId: ad.id,
+          agentId: agentId,
+          paidAdId: ad.id,
+        });
+        console.log("Impression tracked for ad:", ad.id);
+      } catch (error) {
+        console.error("Failed to track impression:", error);
+      }
+    },
+    [agentId],
+  );
+
+  // Track click and handle ad click
+  const handleAdClick = async (ad) => {
+    console.log("Ad clicked:", ad);
+
+    // Extract merchant ID from the ad
+    const merchantId = ad.id;
+
+    if (!merchantId) {
+      console.error("No merchant ID found in ad");
+      return;
+    }
+
+    // Track the click in analytics
+    try {
+      await axiosInstance.post("/analytics/track-click", {
+        merchantId: merchantId,
+        agentId: agentId,
+        paidAdId: ad.id,
+      });
+      console.log("Click tracked for ad:", ad.id);
+    } catch (error) {
+      console.error("Failed to track click:", error);
+    }
+
+    // Find the merchant in the current merchants list
+    let merchant = merchants.find((m) => m.id === merchantId);
+
+    console.log("Merchant found in list:", merchant);
+
+    // If merchant not found in current list, try to fetch it
+    if (!merchant) {
+      try {
+        console.log("Fetching merchant data for ID:", merchantId);
+        const response = await axiosInstance.get(`/coupons/public-feed`, {
+          params: {
+            adminId: agentId,
+            merchantId: merchantId,
+          },
+        });
+
+        const rawData = response.data?.data?.merchants || [];
+        console.log("Fetched merchant data:", rawData);
+
+        if (rawData.length > 0) {
+          const item = rawData[0];
+          merchant = {
+            id: item.id,
+            name: item.business_name || t("fallback.unknown"),
+            category: item.business_type || t("fallback.general"),
+            city: item.city || t("fallback.unknown"),
+            country: item.country || "",
+            address: item.address || "",
+            logo: null,
+            coverImage: null,
+            batches:
+              item.batches?.map((b) => ({
+                id: b.id,
+                batch_name: b.batch_name,
+                discount_percentage: b.discount_percentage,
+                expiry_date: b.expiry_date,
+                is_active: b.is_active,
+                rendered_html: b.rendered_html,
+                total_quantity: b.total_quantity,
+                issued_quantity: b.issued_quantity,
+              })) || [],
+          };
+        }
+      } catch (err) {
+        console.error("Failed to fetch merchant for ad:", err);
+        toast.error("Failed to load merchant details");
+        return;
+      }
+    }
+
+    console.log("Final merchant object:", merchant);
+    console.log("Merchant batches:", merchant?.batches);
+
+    // If we have a merchant and it has active batches, open the coupon form
+    if (merchant && merchant.batches && merchant.batches.length > 0) {
+      const activeBatch = merchant.batches.find((b) => b.is_active);
+      console.log("Active batch found:", activeBatch);
+
+      if (activeBatch) {
+        handleGetCoupon(merchant, activeBatch);
+      } else {
+        // If no active batch, use the first batch
+        console.log("No active batch, using first batch:", merchant.batches[0]);
+        handleGetCoupon(merchant, merchant.batches[0]);
+      }
+    } else {
+      console.error("No merchant or no batches available");
+      toast.error("No coupons available for this merchant");
+    }
+  };
+
+  const handleNavigateHome = () => {
+    // Clear agent data from localStorage when navigating away
+    localStorage.removeItem("selectedAgent");
+    router.push("/");
+  };
+
+  const handleNavigateLogin = () => {
+    // Optionally keep agent data for login flow
+    router.push("/login");
+  };
+
+  return (
+    <div className="min-h-screen bg-white font-sans text-slate-900">
+      {/* --- Navigation --- */}
+      <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/10 transition-all" style={{background: 'linear-gradient(180deg, rgba(30,27,75,0.95) 0%, rgba(49,46,129,0.90) 100%)'}}>
+        <div className="max-w-[1600px] mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
+          <div
+            onClick={handleNavigateHome}
+            className="flex items-center gap-2 group cursor-pointer"
+          >
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform" style={{background: 'linear-gradient(135deg, #a78bfa, #ec4899)'}}>
+              <QrCode className="w-5 h-5" />
+            </div>
+            <span className="font-extrabold text-xl tracking-tight text-white group-hover:text-purple-300 transition-colors">
+              {tCommon("brandName")}
+            </span>
+          </div>
+
+          <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8 text-[14px] font-bold tracking-tight">
+            <Link
+              href="#marketplace"
+              className="text-white/65 hover:text-white transition-colors"
+            >
+              {t("navigation.marketplace")}
+            </Link>
+            <Link
+              href="#features"
+              className="text-white/65 hover:text-white transition-colors"
+            >
+              {t("navigation.features")}
+            </Link>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <Button
+              size="sm"
+              className="hidden sm:flex rounded-full font-bold text-white border-none shadow-lg"
+              style={{background: 'linear-gradient(135deg, #6366f1, #8b5cf6)'}}
+              onClick={handleNavigateLogin}
+            >
+              {t("navigation.signIn")}
+            </Button>
+            {/* Mobile Menu Trigger */}
+            <Sheet>
+              <SheetTrigger asChild suppressHydrationWarning>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden text-white hover:bg-white/10"
+                  suppressHydrationWarning
+                >
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetTitle className="text-xl font-bold text-slate-900 mb-4">
+                  {t("navigation.menu")}
+                </SheetTitle>
+                <div className="flex flex-col gap-4 mt-8">
+                  {agent?.name && (
+                    <div className="mb-4 pb-4 border-b border-slate-200">
+                      <p className="text-sm text-slate-500 font-semibold uppercase tracking-wider">
+                        {t("navigation.partner")}
+                      </p>
+                      <p className="text-lg font-bold text-slate-900">
+                        {agent.name}
+                      </p>
+                      {agent.location && (
+                        <p className="text-sm text-slate-600 flex items-center gap-1 mt-1">
+                          <MapPin className="w-3 h-3" />
+                          {agent.location}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  <div
+                    onClick={handleNavigateHome}
+                    className="text-lg font-bold cursor-pointer hover:text-primary transition-colors"
+                  >
+                    {t("navigation.home")}
+                  </div>
+                  <Link href="#marketplace" className="text-lg font-bold">
+                    {t("navigation.marketplace")}
+                  </Link>
+                  <Button onClick={handleNavigateLogin} className="w-full">
+                    {t("navigation.signIn")}
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </header>
+
+      <main className="relative z-10 -mt-4 bg-white  shadow-[0_-10px_40px_rgba(0,0,0,0.1)] overflow-hidden">
+        {/* --- Highlight / Hero Section --- */}
+        <section className="relative w-full overflow-hidden mb-12">
+          {/* Background with gradient */}
+          <div 
+            className="absolute inset-0" 
+            style={{
+              background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4c1d95 50%, #5b21b6 75%, #6d28d9 100%)'
+            }}
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
+                backgroundSize: '60px 60px',
+              }}
+            />
+          </div>
+          
+          {/* Radial glow */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(ellipse 80% 50% at 50% 20%, rgba(139,92,246,0.4) 0%, rgba(99,102,241,0.2) 40%, transparent 70%)',
+            }}
+          />
+
+          <div className="relative z-10 max-w-5xl mx-auto px-6 text-center space-y-8 animate-in fade-in zoom-in duration-700 pt-20 pb-12">
+            <Badge
+              variant="outline"
+              className="border-white/15 bg-white/5 text-white/80 backdrop-blur-sm px-4 py-2 uppercase tracking-widest text-xs font-bold shadow-xl inline-block"
+            >
+              {t("hero.officialPartnerNetwork")}
+            </Badge>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1] drop-shadow-2xl">
+              <span className="text-white">{t("hero.exclusiveDeals")}</span>
+              <br />
+              <span className="text-white">{t("hero.noRegistration")}</span>
+            </h1>
+            
+            <p className="text-lg text-white/70 max-w-2xl mx-auto leading-relaxed font-medium">
+              {t("hero.descriptionDefault")}
+            </p>
+
+            <p className="text-sm text-white/60 max-w-xl mx-auto font-medium">
+              {t("hero.noAccountNeeded")}
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap items-center justify-center gap-4 pt-6">
+              <Button
+                size="lg"
+                className="font-semi-bold text-white border-none shadow-lg px-10 py-8 gap-2 text-xl"
+                style={{background: 'linear-gradient(135deg, #3b82f6, #60a5fa)'}}
+              >
+                <Gift className="w-5 h-5" />
+                {t("hero.getCoupons")}
+              </Button>
+              <Button
+                size="lg"
+                className=" font-semi-bold text-white border-none shadow-lg px-10 py-8 gap-2 text-xl"
+                style={{background: 'linear-gradient(135deg, #a855f7, #d946ef)'}}
+              >
+                <Zap className="w-5 h-5" />
+                {t("hero.startAutomation")}
+              </Button>
+              <Button
+                size="lg"
+                className=" font-semi-bold text-white border-none shadow-lg py-8 px-10 gap-2 text-xl"
+                style={{background: 'linear-gradient(135deg, #ec4899, #f472b6)'}}
+              >
+                <Megaphone className="w-5 h-5" />
+                {t("hero.startCampaign")}
+              </Button>
+            </div>
+          </div>
+
+          {/* Top Ad Banner - Bottom of Hero */} bewajah 1
+          {topAd && (
+            <div className="relative z-10 px-6 lg:px-10 max-w-[1600px] mx-auto pb-12">
+              <div className="flex items-center gap-2 mb-6 opacity-60 justify-center">
+                <span className="h-px w-24 bg-white/20"></span>
+                <span className="text-[11px] uppercase font-bold text-white/40 tracking-[0.2em]">
+                  {t("ads.sponsored")}
+                </span>
+                <span className="h-px w-24 bg-white/20"></span>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-linear-to-b from-indigo-500/10 via-indigo-500/5 to-transparent rounded-3xl blur-3xl"></div>
+                <div className="relative">
+                  <TopBannerAd
+                    ad={topAd}
+                    onClick={handleAdClick}
+                    agentId={agentId}
+                    onImpression={handleAdImpression}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
+        
+        {/* --- Filter Bar --- */}
+        <section
+          className="px-6 lg:px-10 max-w-[1600px] mx-auto mb-8 relative z-20"
+          id="marketplace"
+        >
+          <MarketplaceFilters
+            searchQuery={searchQuery}
+            setSearchQuery={(value) => {
+              setSearchQuery(value);
+              setPage(1);
+            }}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={(value) => {
+              setSelectedCategory(value);
+              setPage(1);
+            }}
+            selectedRegion={selectedRegion}
+            setSelectedRegion={(value) => {
+              setSelectedRegion(value);
+              setPage(1);
+            }}
+            expiringSoon={expiringSoon}
+            setExpiringSoon={(value) => {
+              setExpiringSoon(value);
+              setPage(1);
+            }}
+            categories={categories}
+            cities={cities}
+          />
+        </section>
+
+        <section className="px-6 lg:px-10 max-w-[1600px] mx-auto pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 items-start gap-8 transition-all duration-700">
+            {/* Left Sidebar (Ads Only) - Always show if leftAd exists */} bewajah 2
+            {leftAd && (
+              <div className="hidden xl:block lg:col-span-2 sticky top-28 space-y-8 pt-16 mr-20">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2 opacity-50 px-2">
+                    <span className="h-px flex-1 bg-slate-300"></span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                      {t("ads.partner")}
+                    </span>
+                    <span className="h-px flex-1 bg-slate-300"></span>
+                  </div>
+                  <SidebarAd
+                    ad={leftAd}
+                    onClick={handleAdClick}
+                    agentId={agentId}
+                    onImpression={handleAdImpression}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Merchant List - Dynamic width based on leftAd presence */}
+            <div
+              ref={merchantListRef}
+              className={cn(
+                "col-span-1 w-full min-w-0",
+                leftAd
+                  ? "lg:col-span-7 xl:col-span-7"
+                  : "lg:col-span-8 xl:col-span-9",
+              )}
+            >
+              <MerchantList
+                merchants={merchants}
+                selectedMerchantId={selectedMerchantId}
+                setSelectedMerchantId={setSelectedMerchantId}
+                loading={loading}
+                error={error}
+                page={page}
+                totalItems={totalMerchants}
+                hasMore={hasMore}
+                onPageChange={(pageNum) => fetchMerchants(pageNum)}
+                ads={inlineAds}
+                isScrollable={false}
+                onAdClick={handleAdClick}
+              />
+            </div>
+
+            {/* Right Detail Panel - Always show */}
+            <div
+              className={cn(
+                "col-span-1 lg:block min-w-0",
+                leftAd
+                  ? "lg:col-span-5 xl:col-span-3"
+                  : "lg:col-span-4 xl:col-span-3",
+              )}
+            >
+              <div className="sticky top-24 space-y-4">
+                {/* Detail Panel */}
+                <MerchantDetail
+                  activeMerchant={activeMerchant}
+                  handleGetCoupon={handleGetCoupon}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Detail Modal */}
+          {selectedMerchantId && (
+            <Sheet
+              open={!!selectedMerchantId && window.innerWidth < 1024}
+              onOpenChange={(open) => !open && setSelectedMerchantId(null)}
+            >
+              <SheetContent
+                side="bottom"
+                className="h-[85vh] p-0 rounded-t-3xl border-0"
+              >
+                <SheetTitle className="sr-only">
+                  {t("merchantDetail.merchantDetails")}
+                </SheetTitle>
+                <div className="overflow-y-auto h-full">
+                  <MerchantDetail
+                    activeMerchant={activeMerchant}
+                    handleGetCoupon={handleGetCoupon}
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
+        </section>
+        {/* -- Dynamic Features Section -- */}
+        <section
+          className="bg-white py-24 border-t border-slate-100 relative mb-30"
+          id="features"
+        >
+          <div className="px-6 lg:px-10 max-w-[1600px] mx-auto">
+            {/* Right Sidebar Ad - Positioned at top right */} bewajah 3
+            {rightAd && (
+              <div className="hidden lg:block absolute top-8 right-10 w-[300px]">
+                <div className="flex items-center gap-2 mb-4 opacity-50 px-2">
+                  <span className="h-px flex-1 bg-slate-300"></span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                    {t("ads.sponsored")}
+                  </span>
+                  <span className="h-px flex-1 bg-slate-300"></span>
+                </div>
+                <SidebarAd
+                  ad={rightAd}
+                  onClick={handleAdClick}
+                  agentId={agentId}
+                  onImpression={handleAdImpression}
+                />
+              </div>
+            )}
+
+            {/* Render dynamic landing page content or fallback to default features */}
+            <DynamicLandingPageSections adminId={agentId} />
+          </div>
+        </section>
+      </main>
+
+      {/* --- Footer --- */}
+      <footer className="bg-slate-950 text-slate-400 pt-10 pb-7 px-6 lg:px-10 border-t border-slate-900">
+        {/* Bottom Ad Banner - Prominent in Footer */} bewajah 4
+        {bottomAd && (
+          <div className="max-w-[1600px] mx-auto mb-12">
+            <div className="flex items-center gap-2 mb-4 opacity-60 justify-center">
+              <span className="h-px w-24 bg-slate-700"></span>
+              <span className="text-[11px] uppercase font-bold text-slate-400 tracking-[0.2em]">
+                {t("ads.sponsored")}
+              </span>
+              <span className="h-px w-24 bg-slate-700"></span>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-linear-to-b from-slate-900/50 to-transparent rounded-3xl blur-2xl"></div>
+              <div className="relative">
+                <BottomBannerAd
+                  ad={bottomAd}
+                  onClick={handleAdClick}
+                  agentId={agentId}
+                  onImpression={handleAdImpression}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-center text-white">
+              <QrCode className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-white text-lg tracking-tight">
+                {tCommon("brandName")}
+              </span>
+              <span className="text-xs text-slate-500">
+                {footerTitle || t("footer.globalMerchantNetwork")}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex gap-8 text-sm font-bold">
+            <Link href="/privacy-policy" className="hover:text-white transition">
+              {t("footer.privacyPolicy")}
+            </Link>
+            <Link href="/terms-and-conditions" className="hover:text-white transition">
+              {t("footer.termsOfService")}
+            </Link>
+            <Link href="#" className="hover:text-white transition">
+              {t("footer.agentLogin")}
+            </Link>
+          </div>
+
+          <div className="text-xs text-slate-600 font-medium">
+            {t("footer.copyright", { year: new Date().getFullYear() })}
+          </div>
+        </div>
+      </footer>
+
+      {/* Simple Coupon Form Dialog */}
+      <CouponForm
+        open={couponDialogOpen}
+        onOpenChange={setCouponDialogOpen}
+        merchant={selectedCouponData.merchant}
+        batch={selectedCouponData.batch}
+      />
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+heading font : space grotesk(bold)
+description font :Montserrat.(medium)
+
+color code of orange : fe5108
+
+black color code : 0a0a0a
+
+navitems text :ocr a extended.
+
+morphism :   white e7eef8 
+
+morphism black : 292929
+
+minor shade for bright white : dce7ee
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+https://vouchera.net/backend/api/v1/super-admins/dashboard
+
+http://localhost:8000/api/v1/legal-pages?type=privacy-policy
+
+https://vouchera.net/backend/api/v1/legal-pages?type=privacy-policy
+
+
+        const res = await axiosInstance.get(`/legal-pages/public/${type}`);
+

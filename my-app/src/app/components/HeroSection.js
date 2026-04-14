@@ -3,10 +3,14 @@
 import Image from "next/image";
 import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { saveQuoteRequest } from "../firebase";
 
 export default function HeroSection() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [submitMessage, setSubmitMessage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -42,16 +46,46 @@ export default function HeroSection() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     event.preventDefault();
-    setIsQuoteModalOpen(false);
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      company: "",
-      message: "",
-    });
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+    setSubmitMessage("");
+
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        company: formData.company.trim(),
+        message: formData.message.trim(),
+        status: "pending",
+      };
+
+      await saveQuoteRequest(payload);
+
+      setSubmitStatus("success");
+      setSubmitMessage("Quote submitted successfully. We will contact you soon.");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        company: "",
+        message: "",
+      });
+
+      setTimeout(() => {
+        setIsQuoteModalOpen(false);
+        setSubmitStatus(null);
+        setSubmitMessage("");
+      }, 1800);
+    } catch (error) {
+      setSubmitStatus("error");
+      setSubmitMessage("Unable to submit right now. Please try again.");
+      console.error("Quote submission failed:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,9 +118,13 @@ export default function HeroSection() {
             <a href="#projects" className="nav-link">
               Projects
             </a>
-            <a href="#contact" className="nav-link">
-              Contact
-            </a>
+            <button
+              type="button"
+              onClick={() => setIsQuoteModalOpen(true)}
+              className="rounded-full border border-[#ff5a0f]/70 bg-[#ff5a0f]/15 px-4 py-2 font-[Sora] text-xs font-semibold text-white transition hover:bg-[#ff5a0f]"
+            >
+              Get Free Sourcing Quotation
+            </button>
           </header>
         </div>
 
@@ -146,13 +184,16 @@ export default function HeroSection() {
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#contact"
-                    onClick={closeMobileMenu}
-                    className="block rounded-lg px-3 py-2 font-[Sora] text-sm text-white"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeMobileMenu();
+                      setIsQuoteModalOpen(true);
+                    }}
+                    className="block w-full rounded-lg bg-[#ff5a0f] px-3 py-2 text-left font-[Sora] text-sm font-semibold text-white"
                   >
-                    Contact
-                  </a>
+                    Get Free Sourcing Quotation
+                  </button>
                 </li>
               </ul>
             </nav>
@@ -222,6 +263,18 @@ export default function HeroSection() {
             </div>
 
             <form className="grid grid-cols-1 gap-4 md:grid-cols-2" onSubmit={onSubmit}>
+              {submitStatus === "success" && (
+                <div className="md:col-span-2 rounded-xl border border-green-600/50 bg-green-900/25 p-3 text-sm text-green-200">
+                  {submitMessage}
+                </div>
+              )}
+
+              {submitStatus === "error" && (
+                <div className="md:col-span-2 rounded-xl border border-red-600/50 bg-red-900/25 p-3 text-sm text-red-200">
+                  {submitMessage}
+                </div>
+              )}
+
               <label className="space-y-2 text-sm">
                 <span>Name</span>
                 <input
@@ -230,7 +283,8 @@ export default function HeroSection() {
                   type="text"
                   value={formData.name}
                   onChange={onInputChange}
-                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="Your full name"
                 />
               </label>
@@ -243,7 +297,8 @@ export default function HeroSection() {
                   type="email"
                   value={formData.email}
                   onChange={onInputChange}
-                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="you@company.com"
                 />
               </label>
@@ -255,7 +310,8 @@ export default function HeroSection() {
                   type="tel"
                   value={formData.phone}
                   onChange={onInputChange}
-                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="+1 234 567 891"
                 />
               </label>
@@ -267,7 +323,8 @@ export default function HeroSection() {
                   type="text"
                   value={formData.company}
                   onChange={onInputChange}
-                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="Company name"
                 />
               </label>
@@ -280,7 +337,8 @@ export default function HeroSection() {
                   rows={4}
                   value={formData.message}
                   onChange={onInputChange}
-                  className="w-full resize-none rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f]"
+                  disabled={isSubmitting}
+                  className="w-full resize-none rounded-xl border border-zinc-600 bg-zinc-900/70 px-4 py-3 outline-none transition focus:border-[#ff5a0f] disabled:cursor-not-allowed disabled:opacity-60"
                   placeholder="Tell us what products you need sourced."
                 />
               </label>
@@ -288,9 +346,10 @@ export default function HeroSection() {
               <div className="md:col-span-2">
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-[#ff5a0f] px-5 py-3 font-semibold text-white transition hover:bg-[#ff6f2c]"
+                  disabled={isSubmitting}
+                  className="w-full rounded-xl bg-[#ff5a0f] px-5 py-3 font-semibold text-white transition hover:bg-[#ff6f2c] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Submit Request
+                  {isSubmitting ? "Submitting..." : "Submit Request"}
                 </button>
               </div>
             </form>
