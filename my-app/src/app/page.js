@@ -16,7 +16,7 @@ export default function Home() {
       <AboutUsSection />
       <ServicesSection />
       <Services2 />
-      <PlatformsSection />
+      {/* <PlatformsSection /> */}
       <EfficiencySection />
       <LogoMarquee />
 

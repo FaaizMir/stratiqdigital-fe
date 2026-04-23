@@ -1,12 +1,30 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { Plus } from "lucide-react";
 
 const differenceItems = [
-  "Quality Assurance",
-  "Competitive Prices",
-  "Commitment to Our Clients",
-  "Professional Sourcing Team",
-  "In-house Packaging Solution",
+  {
+    title: "Quality Assurance",
+    description: "We maintain rigorous quality control standards at every step of production. Our team conducts thorough inspections to ensure products meet your exact specifications.",
+  },
+  {
+    title: "Competitive Prices",
+    description: "By working directly with factories and eliminating middlemen, we pass savings directly to you. Our volume purchasing power ensures you get the best rates without compromising quality.",
+  },
+  {
+    title: "Commitment to Our Clients",
+    description: "Your success is our priority. We provide dedicated support throughout your entire sourcing journey, from product selection to final delivery and beyond.",
+  },
+  {
+    title: "Professional Sourcing Team",
+    description: "Our experienced sourcing agents have deep industry knowledge and established relationships with trusted manufacturers. We navigate complexities so you can focus on your business.",
+  },
+  {
+    title: "In-house Packaging Solution",
+    description: "We handle all packaging and branding needs in-house, reducing costs and ensuring consistency. From design to fulfillment, we manage every detail for you.",
+  },
 ];
 
 const categories = [
@@ -31,6 +49,12 @@ const categories = [
 ];
 
 export default function Services2() {
+  const [expandedId, setExpandedId] = useState(null);
+
+  const toggleExpand = (index) => {
+    setExpandedId(expandedId === index ? null : index);
+  };
+
   return (
     <section id="difference" className="w-full bg-[var(--black)] px-4 py-16 md:px-8 md:py-24">
       <div className="mx-auto max-w-7xl">
@@ -43,15 +67,40 @@ export default function Services2() {
             </h2>
 
             <div className="morphism-surface-dark mt-8 rounded-3xl border border-zinc-600 p-6 md:p-7">
-              {differenceItems.map((item) => (
-                <div
-                  key={item}
-                  className="flex items-center justify-between border-b border-zinc-400/70 py-3 text-white"
-                >
-                  <p className="heading-font text-xl leading-tight md:text-[2rem]">
-                    {item}
-                  </p>
-                  <Plus className="h-6 w-6 shrink-0 text-zinc-200" />
+              {differenceItems.map((item, index) => (
+                <div key={index}>
+                  <button
+                    onClick={() => toggleExpand(index)}
+                    className={`flex w-full items-center justify-between border-b py-3 text-left transition-all duration-300 ${
+                      expandedId === index
+                        ? "border-[var(--orange)] bg-orange-500/10"
+                        : "border-zinc-400/70 hover:border-[var(--orange)]/50"
+                    } hover:bg-zinc-800/30 rounded-lg px-3 -mx-3`}
+                  >
+                    <p
+                      className={`heading-font text-xl leading-tight md:text-[2rem] transition-colors duration-300 ${
+                        expandedId === index
+                          ? "text-[var(--orange)]"
+                          : "text-white hover:text-[var(--orange)]"
+                      }`}
+                    >
+                      {item.title}
+                    </p>
+                    <Plus
+                      className={`h-6 w-6 shrink-0 transition-all duration-300 ${
+                        expandedId === index
+                          ? "text-[var(--orange)] rotate-45"
+                          : "text-zinc-200 hover:text-[var(--orange)]"
+                      }`}
+                    />
+                  </button>
+                  {expandedId === index && (
+                    <div className="overflow-hidden">
+                      <p className="description-font px-3 py-4 text-base md:text-lg leading-relaxed text-zinc-300 animate-in fade-in slide-in-from-top-2 duration-300">
+                        {item.description}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

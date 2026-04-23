@@ -99,7 +99,7 @@ export default function FooterSection() {
             className="heading-font inline-flex items-center gap-3 text-2xl text-white md:text-4xl"
           >
             <Phone className="h-6 w-6 md:h-8 md:w-8" />
-            1-888-000-0000
+            ‪(289) 748-7424‬
           </a>
         </div>
       </div>
